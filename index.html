@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Paciente - Consultorio Médico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-med': '#004e92', // Verde esmeralda para un toque médico fresco
+                        'secondary-med': '#3b82f6', // Azul para acciones
+                        'bg-light': '#F9FAFB',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        /* Estilo para las pestañas activas */
+        .tab-button.active {
+            border-bottom: 3px solid theme('colors.primary-med');
+            color: theme('colors.primary-med');
+            font-weight: 600;
+        }
+
+        /* Ocultar contenido por defecto */
+        .tab-content {
+            display: none;
+        }
+
+        /* Mostrar contenido activo */
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-bg-light min-h-screen font-sans">
+
+    <!-- Encabezado y Navegación -->
+    <header class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-med mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 8h16M4 16h16" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16" />
+                </svg>
+                Panel de Paciente
+            </h1>
+            <div class="flex items-center space-x-4">
+                <span class="text-gray-700 font-medium hidden sm:inline">Hola, Ana García</span>
+                <button class="p-2 rounded-full bg-primary-med text-white hover:bg-primary-med/90 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Tarjeta de Próxima Cita (Destacada) -->
+        <section class="mb-8">
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Mi Próxima Cita</h2>
+            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-primary-med transition hover:shadow-xl duration-300">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                    
+                    <!-- Información Principal -->
+                    <div class="mb-4 md:mb-0">
+                        <p class="text-lg text-primary-med font-bold">Cardiología</p>
+                        <h3 class="text-3xl font-extrabold text-gray-900">Dr. Elena Torres</h3>
+                        <p class="text-gray-500 mt-1">Consultorio: 3 | Especialista en Arritmias</p>
+                    </div>
+
+                    <!-- Fecha y Hora -->
+                    <div class="flex items-center space-x-6">
+                        <div class="text-center p-3 bg-indigo-50 rounded-lg">
+                            <p class="text-xs font-medium text-indigo-600">Fecha</p>
+                            <p class="text-xl font-bold text-indigo-800">25 OCT</p>
+                            <p class="text-sm font-medium text-indigo-600">2025</p>
+                        </div>
+                        <div class="text-center p-3 bg-primary-med/10 rounded-lg">
+                            <p class="text-xs font-medium text-primary-med">Hora</p>
+                            <p class="text-xl font-bold text-primary-med">10:00 AM</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="mt-6 pt-4 border-t border-gray-100 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                    <button onclick="rescheduleAppointment('Cardiología')" class="flex-1 bg-secondary-med text-white py-2 px-4 rounded-lg font-medium hover:bg-secondary-med/90 transition shadow-md">
+                        Reprogramar Cita
+                    </button>
+                    <button onclick="cancelAppointment('Cardiología')" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-red-600 transition shadow-md">
+                        Cancelar
+                    </button>
+                    <button onclick="getDirections()" class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300 transition">
+                        Cómo Llegar
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pestañas de Citas -->
+        <section class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex border-b border-gray-200 mb-6">
+                <button id="upcoming-tab" class="tab-button active pb-3 px-4 transition text-gray-600 hover:text-primary-med" onclick="switchTab('upcoming')">
+                    Citas Pendientes
+                </button>
+                <button id="completed-tab" class="tab-button pb-3 px-4 transition text-gray-600 hover:text-primary-med" onclick="switchTab('completed')">
+                    Historial de Citas
+                </button>
+            </div>
+
+            <!-- Contenido de Citas Pendientes -->
+            <div id="upcoming-content" class="tab-content active space-y-4">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Próximas Citas (Excluyendo la destacada)</h3>
+                
+                <!-- Cita 1 -->
+                <div class="flex flex-col sm:flex-row items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-sm transition">
+                    <div class="flex items-center space-x-4 mb-3 sm:mb-0 w-full sm:w-auto">
+                        <span class="text-2xl text-yellow-600">🥑</span>
+                        <div>
+                            <p class="font-semibold text-gray-800">Nutrición</p>
+                            <p class="text-sm text-gray-500">Lic. Javier Soto</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <p class="text-md font-medium text-gray-700">10 Nov 2025, 3:00 PM</p>
+                        <button onclick="rescheduleAppointment('Nutrición')" class="text-sm text-secondary-med hover:text-secondary-med/80 font-medium">Reprogramar</button>
+                    </div>
+                </div>
+
+                <!-- Cita 2 -->
+                <div class="flex flex-col sm:flex-row items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-sm transition">
+                    <div class="flex items-center space-x-4 mb-3 sm:mb-0 w-full sm:w-auto">
+                        <span class="text-2xl text-blue-600">🦷</span>
+                        <div>
+                            <p class="font-semibold text-gray-800">Odontología</p>
+                            <p class="text-sm text-gray-500">Dra. Claudia Ramos</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <p class="text-md font-medium text-gray-700">1 Dic 2025, 9:30 AM</p>
+                        <button onclick="rescheduleAppointment('Odontología')" class="text-sm text-secondary-med hover:text-secondary-med/80 font-medium">Reprogramar</button>
+                    </div>
+                </div>
+                
+                <!-- Botón para solicitar nueva cita -->
+                <div class="pt-4 text-center">
+                    <button class="bg-primary-med text-white py-2 px-6 rounded-full font-semibold hover:bg-primary-med/90 transition shadow-lg">
+                        + Solicitar Nueva Cita
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenido de Historial de Citas -->
+            <div id="completed-content" class="tab-content space-y-4">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Citas Realizadas Recientemente</h3>
+                
+                <!-- Historial 1 -->
+                <div class="flex flex-col sm:flex-row items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="flex items-center space-x-4 mb-3 sm:mb-0 w-full sm:w-auto">
+                        <span class="text-2xl text-green-600">🩺</span>
+                        <div>
+                            <p class="font-semibold text-gray-800">Medicina General</p>
+                            <p class="text-sm text-gray-500">Dr. Ricardo Pérez</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <p class="text-md font-medium text-gray-700">1 Oct 2025</p>
+                        <button onclick="viewSummary('Medicina General')" class="text-sm text-gray-500 hover:text-gray-800 font-medium">Ver Resumen</button>
+                    </div>
+                </div>
+
+                <!-- Historial 2 -->
+                <div class="flex flex-col sm:flex-row items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="flex items-center space-x-4 mb-3 sm:mb-0 w-full sm:w-auto">
+                        <span class="text-2xl text-red-600">🧪</span>
+                        <div>
+                            <p class="font-semibold text-gray-800">Laboratorio (Extracción de sangre)</p>
+                            <p class="text-sm text-gray-500">Sede Principal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <p class="text-md font-medium text-gray-700">15 Sep 2025</p>
+                        <button onclick="viewResults('Laboratorio')" class="text-sm text-secondary-med hover:text-secondary-med/80 font-medium">Ver Resultados</button>
+                    </div>
+                </div>
+
+                <!-- Historial 3 -->
+                <div class="flex flex-col sm:flex-row items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="flex items-center space-x-4 mb-3 sm:mb-0 w-full sm:w-auto">
+                        <span class="text-2xl text-purple-600">👁️</span>
+                        <div>
+                            <p class="font-semibold text-gray-800">Oftalmología</p>
+                            <p class="text-sm text-gray-500">Dra. Laura Montes</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <p class="text-md font-medium text-gray-700">20 Ago 2025</p>
+                        <button onclick="viewSummary('Oftalmología')" class="text-sm text-gray-500 hover:text-gray-800 font-medium">Ver Resumen</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Modal de Mensajes (Reemplaza alert()) -->
+        <div id="messageModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm mx-4 transform transition-all duration-300 scale-100">
+                <h3 id="modalTitle" class="text-xl font-bold text-gray-800 mb-3">Acción</h3>
+                <p id="modalMessage" class="text-gray-600 mb-4"></p>
+                <button onclick="closeModal()" class="w-full bg-primary-med text-white py-2 rounded-lg font-medium hover:bg-primary-med/90 transition">Cerrar</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Pie de página simple -->
+    <footer class="mt-12 py-4 text-center text-gray-500 text-sm border-t border-gray-200">
+        © 2025 Consultorio Médico. Todos los derechos reservados.
+    </footer>
+
+    <script>
+        // Funciones para gestionar el dashboard
+        
+        const modal = document.getElementById('messageModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+
+        // Función para mostrar mensajes en un modal (en lugar de alert)
+        function showMessage(title, message = '') {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message || `Has seleccionado la acción: ${title}. Aquí se abriría la interfaz correspondiente.`;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        // Función para cerrar el modal
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Funciones de acción de citas
+        function rescheduleAppointment(specialty) {
+            showMessage('Reprogramar Cita', `Iniciando proceso de reprogramación para ${specialty}. Se mostraría un calendario de disponibilidad.`);
+        }
+
+        function cancelAppointment(specialty) {
+            showMessage('Confirmar Cancelación', `¿Estás seguro de que deseas cancelar la cita de ${specialty}? Se enviaría una notificación al consultorio.`);
+        }
+        
+        function getDirections() {
+            showMessage('Obtener Dirección', 'Aquí se mostraría un mapa con la ubicación del consultorio o un enlace directo.');
+        }
+
+        function viewSummary(specialty) {
+            showMessage('Resumen de Consulta', `Accediendo al resumen médico post-consulta de ${specialty}.`);
+        }
+        
+        function viewResults(specialty) {
+            showMessage('Ver Resultados', `Mostrando los resultados de ${specialty}.`);
+        }
+
+
+        // Función para cambiar entre pestañas
+        function switchTab(tabId) {
+            // Desactivar todos los botones y contenidos
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Activar el botón y el contenido seleccionados
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+            document.getElementById(`${tabId}-content`).classList.add('active');
+        }
+
+        // Inicializar: asegurar que la pestaña 'upcoming' esté activa por defecto (aunque ya lo hicimos con clases, es buena práctica)
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTab('upcoming');
+        });
+    </script>
+</body>
+</html>

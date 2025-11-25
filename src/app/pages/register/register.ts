@@ -1,31 +1,75 @@
-import { Component, AfterViewInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './register.html',
-  styleUrl: './register.css'
+  styleUrls: ['./register.css']
 })
-export class Register implements AfterViewInit {
-  ngAfterViewInit(): void {
-    const toggleButton = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password') as HTMLInputElement | null;
-    const eyeIcon = document.getElementById('eyeIcon');
+export class Register {
+  name = '';
+  cc = '';
+  phone:any = '';
+  password = '';
+  isLoading = false;
+  errorMessage = '';
 
-    if (!toggleButton || !passwordInput || !eyeIcon) return;
+  constructor(private router: Router) {}
 
-    toggleButton.addEventListener('click', function () {
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
-      if (type === 'text') {
-        eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-7-10-7s.24-1.22.77-2.31M7 7c-.52.92-.8 1.93-.8 3.03M15.4 15.4c-.67.67-1.55 1.05-2.5 1.05A3.5 3.5 0 0 1 9.4 10.4M2 2l20 20"/>';
-        toggleButton.setAttribute('title', 'Ocultar contraseña');
-      } else {
-        eyeIcon.innerHTML = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle>';
-        toggleButton.setAttribute('title', 'Mostrar contraseña');
+  private getUsers(): any[] {
+    try {
+      return JSON.parse(localStorage.getItem('mf_users') || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  private saveUsers(users: any[]) {
+    localStorage.setItem('mf_users', JSON.stringify(users));
+  }
+
+  handleRegister(e: Event) {
+    e?.preventDefault();
+    this.errorMessage = '';
+
+    // Normalizar teléfono a string (input type=number puede devolver number)
+    const normalizedPhone = String(this.phone ?? '').trim();
+
+    if (!this.name.trim() || !this.cc.trim() || !this.password || !normalizedPhone) {
+      this.errorMessage = 'Completa los campos requeridos.';
+      return;
+    }
+
+    this.isLoading = true;
+
+    setTimeout(() => {
+      const users = this.getUsers();
+      const exists = users.find(u => u.cc === this.cc.trim() || u.phone === normalizedPhone);
+
+      if (exists) {
+        this.errorMessage = 'Ya existe un usuario con esa C.C. o teléfono.';
+        this.isLoading = false;
+        return;
       }
-    });
+
+      const newUser = {
+        cc: this.cc.trim(),
+        name: this.name.trim(),
+        phone: normalizedPhone,
+        password: this.password,
+        createdAt: new Date().toISOString()
+      };
+
+      users.push(newUser);
+      this.saveUsers(users);
+
+      this.isLoading = false;
+      // Redirigir al login después del registro
+      this.router.navigate(['/login']);
+    }, 600);
   }
 }

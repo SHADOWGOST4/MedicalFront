@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+:host {
+    --primary-med: #004e92;
+    --secondary-med: #3b82f6;
+    --bg-light: #F9FAFB;
+    display: block;
+    width: 100%;
+}
+
+body {
+    background-color: var(--bg-light);
+    font-family: 'Inter', sans-serif;
+}
+
+.tab-button {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-button.active {
+    border-bottom: 3px solid #2563eb;
+    color: #2563eb;
+    font-weight: 600;
+}
+
+.tab-button:hover {
+    color: #2563eb;
+}
+
+.tab-content {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Utilidades de Tailwind en CSS puro si es necesario */
+.locked {
+    pointer-events: none;
+    user-select: none;
+    filter: blur(1px);
+    opacity: 0.95;
+}

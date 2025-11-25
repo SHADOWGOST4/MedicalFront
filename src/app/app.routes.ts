@@ -1,10 +1,11 @@
 import { Routes } from '@angular/router';
-import { importProvidersFrom } from '@angular/core';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
+import { Dashboard } from './pages/dashboard/dashboard';
 
 export const routes: Routes = [
 	{ path: 'login', component: Login },
 	{ path: 'register', component: Register },
-	{ path: '', redirectTo: 'login', pathMatch: 'full' }
+	{ path: 'dashboard', component: Dashboard },
+	{ path: '', redirectTo: '/dashboard', pathMatch: 'full' }
 ];
