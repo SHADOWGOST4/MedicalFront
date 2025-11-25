@@ -112,12 +112,22 @@
       <form (ngSubmit)="addAppointment($event)" class="space-y-3">
         <div>
           <label class="block text-sm font-medium text-gray-700">Especialidad</label>
-          <input [(ngModel)]="newSpecialty" name="specialty" required class="mt-1 w-full rounded-md border border-gray-300 p-2" />
+          <select [(ngModel)]="newSpecialty" name="specialty" (change)="onSpecialtyChange()" required
+                  class="mt-1 w-full rounded-md border border-gray-300 p-2">
+            <option value="" disabled selected>Selecciona especialidad</option>
+            <option *ngFor="let s of specialties" [value]="s">{{ s }}</option>
+          </select>
         </div>
+
         <div>
           <label class="block text-sm font-medium text-gray-700">Doctor (opcional)</label>
-          <input [(ngModel)]="newDoctor" name="doctor" class="mt-1 w-full rounded-md border border-gray-300 p-2" />
+          <select [(ngModel)]="newDoctor" name="doctor" [disabled]="!newSpecialty"
+                  class="mt-1 w-full rounded-md border border-gray-300 p-2">
+            <option value="">Selecciona doctor (opcional)</option>
+            <option *ngFor="let d of getDoctorsForSpecialty()" [value]="d">{{ d }}</option>
+          </select>
         </div>
+
         <div class="flex gap-3">
           <div class="flex-1">
             <label class="block text-sm font-medium text-gray-700">Fecha</label>
@@ -128,6 +138,7 @@
             <input [(ngModel)]="newTime" name="time" type="time" required class="mt-1 w-full rounded-md border border-gray-300 p-2" />
           </div>
         </div>
+
         <div>
           <label class="block text-sm font-medium text-gray-700">Notas (opcional)</label>
           <textarea [(ngModel)]="newNotes" name="notes" rows="3" class="mt-1 w-full rounded-md border border-gray-300 p-2"></textarea>

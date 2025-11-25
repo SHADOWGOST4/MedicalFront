@@ -36,6 +36,24 @@ export class Dashboard implements OnInit {
 
   // New appointment modal state
   showNewAppointmentModal = false;
+  // Especialidades y doctores (configurable)
+  specialties = [
+    'Cardiología',
+    'Medicina General',
+    'Odontología',
+    'Nutrición',
+    'Oftalmología'
+  ];
+
+  doctorsMap: Record<string, string[]> = {
+    'Cardiología': ['Dr. Elena Torres', 'Dr. Ricardo Méndez', 'Dra. Paula Ruiz'],
+    'Medicina General': ['Dr. Ricardo Pérez', 'Dra. Marta López', 'Dr. Hugo Salazar'],
+    'Odontología': ['Dra. Claudia Ramos', 'Dr. Andrés Molina', 'Dra. Laura Castro'],
+    'Nutrición': ['Lic. Javier Soto', 'Lic. Silvia Ortega', 'Lic. Mario Díaz'],
+    'Oftalmología': ['Dra. Laura Montes', 'Dr. Fernando Gil', 'Dra. Isabel Soto']
+  };
+
+  // New appointment modal state (reused)
   newSpecialty = '';
   newDoctor = '';
   newDate = ''; // yyyy-mm-dd
@@ -115,10 +133,27 @@ export class Dashboard implements OnInit {
     this.showNewAppointmentModal = true;
   }
 
-  closeNewAppointmentModal() {
-    this.showNewAppointmentModal = false;
+  onSpecialtyChange() {
+    // si hay doctores para la especialidad, seleccionar por defecto el primero (opcional)
+    const list = this.getDoctorsForSpecialty();
+    this.newDoctor = list.length ? list[0] : '';
   }
 
+  getDoctorsForSpecialty(): string[] {
+    return this.doctorsMap[this.newSpecialty] || [];
+  }
+
+  // Cierra el modal de nueva cita y limpia el formulario
+  closeNewAppointmentModal() {
+    this.showNewAppointmentModal = false;
+    this.isSavingAppointment = false;
+    this.newSpecialty = '';
+    this.newDoctor = '';
+    this.newDate = '';
+    this.newTime = '';
+    this.newNotes = '';
+  }
+  
   addAppointment(e?: Event) {
     e?.preventDefault();
     if (!this.currentUser) return;
@@ -126,6 +161,9 @@ export class Dashboard implements OnInit {
     const date = String(this.newDate || '').trim();
     const time = String(this.newTime || '').trim();
     const specialty = String(this.newSpecialty || '').trim();
+    // doctor can be optional (empty string)
+    const doctor = String(this.newDoctor || '').trim();
+
     if (!date || !time || !specialty) {
       this.showMessage('Datos incompletos', 'Completa fecha, hora y especialidad para solicitar la cita.');
       return;
@@ -133,13 +171,12 @@ export class Dashboard implements OnInit {
 
     this.isSavingAppointment = true;
     setTimeout(() => {
-      // build ISO datetime
       const dt = new Date(`${date}T${time}`);
       const appointment: Appointment = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
         userCc: this.currentUser!.cc,
         specialty,
-        doctor: this.newDoctor?.trim() || '',
+        doctor: doctor || '',
         datetime: dt.toISOString(),
         notes: this.newNotes?.trim() || '',
         status: 'upcoming',
@@ -150,15 +187,10 @@ export class Dashboard implements OnInit {
       all.push(appointment);
       this.saveAllAppointments(all);
 
-      // reload for current user
       this.loadAppointmentsForUser();
-
       this.isSavingAppointment = false;
       this.closeNewAppointmentModal();
-
-      // asegurar que la pestaña muestre próximas citas
       this.activeTab = 'upcoming';
-
       this.showMessage('Cita solicitada', 'La cita ha sido agregada a tu lista de próximas citas.');
     }, 500);
   }
